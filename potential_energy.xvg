@@ -1,0 +1,11 @@
+# This file was created by OpenMM Energy Analysis Tool
+# Generated from OpenMM simulation data
+# Property: Potential Energy (kJ/mole)
+@    title "OpenMM Energy Data"
+@    xaxis  label "Frame"
+@    yaxis  label "Potential Energy (kJ/mole)"
+@TYPE xy
+    1.000000    -95.300000
+    2.000000   -102.700000
+    3.000000    -98.100000
+    4.000000   -101.200000

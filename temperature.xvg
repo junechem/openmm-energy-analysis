@@ -1,0 +1,11 @@
+# This file was created by OpenMM Energy Analysis Tool
+# Generated from OpenMM simulation data
+# Property: Temperature (K)
+@    title "OpenMM Energy Data"
+@    xaxis  label "Frame"
+@    yaxis  label "Temperature (K)"
+@TYPE xy
+    1.000000    301.100000
+    2.000000    295.800000
+    3.000000    299.400000
+    4.000000    297.900000
