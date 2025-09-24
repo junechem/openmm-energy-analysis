@@ -57,10 +57,10 @@ def read_openmm_log(filename: str) -> pd.DataFrame:
 
         return df
     except FileNotFoundError:
-        print(f"Error: Could not find file '{filename}'")
+        print(f"Error: Could not find file '{filename}'", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"Error reading file '{filename}': {e}")
+        print(f"Error reading file '{filename}': {e}", file=sys.stderr)
         sys.exit(1)
 
 def find_time_column(df: pd.DataFrame) -> Optional[str]:
@@ -86,7 +86,7 @@ def filter_by_time(df: pd.DataFrame, begin: Optional[float] = None,
 
     if time_col is None:
         if begin is not None or end is not None:
-            print("Warning: No time column found. Time filtering options (-b, -e) will be ignored.")
+            print("Warning: No time column found. Time filtering options (-b, -e) will be ignored.", file=sys.stderr)
         return df
 
     if begin is not None:
@@ -98,10 +98,10 @@ def filter_by_time(df: pd.DataFrame, begin: Optional[float] = None,
 
 def display_column_options(df: pd.DataFrame) -> None:
     """Display available columns for selection"""
-    print("\nSelect the terms you want from the following list by")
-    print("selecting either (part of) the name or the number or a combination.")
-    print("End your selection with an empty line or a zero.")
-    print("-" * 71)
+    print("\nSelect the terms you want from the following list by", file=sys.stderr)
+    print("selecting either (part of) the name or the number or a combination.", file=sys.stderr)
+    print("End your selection with an empty line or a zero.", file=sys.stderr)
+    print("-" * 71, file=sys.stderr)
 
     columns = df.columns.tolist()
 
@@ -114,7 +114,7 @@ def display_column_options(df: pd.DataFrame) -> None:
             # Truncate long column names for display
             display_name = col[:15] + "..." if len(col) > 18 else col
             row_str += f"{col_num:3d}  {display_name:<18} "
-        print(row_str)
+        print(row_str, file=sys.stderr)
 
 def get_user_selection(df: pd.DataFrame) -> List[int]:
     """Get user's column selection"""
@@ -136,7 +136,7 @@ def get_user_selection(df: pd.DataFrame) -> List[int]:
                     if col_num - 1 not in selected_indices:
                         selected_indices.append(col_num - 1)
                 else:
-                    print(f"Invalid column number: {col_num}")
+                    print(f"Invalid column number: {col_num}", file=sys.stderr)
                     continue
             except ValueError:
                 # Try to match by name
@@ -149,16 +149,16 @@ def get_user_selection(df: pd.DataFrame) -> List[int]:
                     if matches[0] not in selected_indices:
                         selected_indices.append(matches[0])
                 elif len(matches) > 1:
-                    print(f"Multiple matches found for '{user_input}':")
+                    print(f"Multiple matches found for '{user_input}':", file=sys.stderr)
                     for match_idx in matches:
-                        print(f"  {match_idx + 1}: {columns[match_idx]}")
+                        print(f"  {match_idx + 1}: {columns[match_idx]}", file=sys.stderr)
                     continue
                 else:
-                    print(f"No matches found for '{user_input}'")
+                    print(f"No matches found for '{user_input}'", file=sys.stderr)
                     continue
 
         except (EOFError, KeyboardInterrupt):
-            print("\nExiting...")
+            print("\nExiting...", file=sys.stderr)
             sys.exit(0)
 
     return selected_indices
@@ -243,7 +243,7 @@ def generate_xvg_files(df: pd.DataFrame, selected_indices: List[int],
             for t, val in zip(time_data, data):
                 f.write(f"{t:12.6f}  {val:12.6f}\n")
 
-        print(f"Generated {filename}")
+        print(f"Generated {filename}", file=sys.stderr)
 
 def calculate_isothermal_compressibility(volume_data: np.ndarray,
                                        temperature: float) -> float:
@@ -352,9 +352,9 @@ def print_fluctuation_properties(df: pd.DataFrame, selected_indices: List[int],
         if 'temperature' not in available_props:
             missing.append("temperature")
 
-        print(f"\nCannot calculate fluctuation properties.")
-        print(f"Missing required properties: {', '.join(missing)}")
-        print("Please select volume and temperature columns to enable fluctuation property calculations.")
+        print(f"\nCannot calculate fluctuation properties.", file=sys.stderr)
+        print(f"Missing required properties: {', '.join(missing)}", file=sys.stderr)
+        print("Please select volume and temperature columns to enable fluctuation property calculations.", file=sys.stderr)
 
 def print_statistics(df: pd.DataFrame, selected_indices: List[int],
                     nmol: Optional[int] = None) -> None:
@@ -368,10 +368,10 @@ def print_statistics(df: pd.DataFrame, selected_indices: List[int],
         time_data = df[time_col].values
         time_start = time_data[0]
         time_end = time_data[-1]
-        print(f"\nLast energy frame read {n_points} time {time_end:8.3f}")
+        print(f"\nLast energy frame read {n_points} time {time_end:8.3f}", file=sys.stderr)
         print(f"\nStatistics over {n_points} steps [ {time_start:8.4f} through {time_end:8.4f} ps ], {len(selected_indices)} data sets")
     else:
-        print(f"\nRead {n_points} data frames")
+        print(f"\nRead {n_points} data frames", file=sys.stderr)
         print(f"\nStatistics over {n_points} data points, {len(selected_indices)} data sets")
 
     print(f"All statistics are over {n_points} points")
@@ -397,9 +397,29 @@ def print_statistics(df: pd.DataFrame, selected_indices: List[int],
 
         print(f"{display_name:<27} {mean_val:10.3f} {error_est:10.4g} {rmsd:10.4g} {drift:10.4g}  ({unit})")
 
+def print_header():
+    """Print program header information to stderr"""
+    print("                :-) OpenMM Energy Analysis Tool (-:", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("                          OpenMM Energy is written by:", file=sys.stderr)
+    print("     Robert J. Weldon      Peter Eastman        Yutong Zhao       John D. Chodera", file=sys.stderr)
+    print("    and the OpenMM development team", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("               Based on the GROMACS gmx energy interface", file=sys.stderr)
+    print("         Check out http://openmm.org for more information.", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("OpenMM Energy:      omm_energy.py, version 1.0", file=sys.stderr)
+    print("Working dir:        " + os.getcwd(), file=sys.stderr)
+    print("Command line:", file=sys.stderr)
+    print("  " + " ".join(sys.argv), file=sys.stderr)
+    print("", file=sys.stderr)
+
 def main():
     """Main function"""
     args = parse_arguments()
+
+    # Print header information
+    print_header()
 
     # Read the log file
     df = read_openmm_log(args.file)
@@ -409,12 +429,12 @@ def main():
         df = filter_by_time(df, args.begin, args.end)
 
         if len(df) == 0:
-            print("Error: No data points in the specified time range")
+            print("Error: No data points in the specified time range", file=sys.stderr)
             sys.exit(1)
 
     # Display file info
-    print(f"\nOpened {args.file} as OpenMM energy file")
-    print()
+    print(f"\nOpened {args.file} as OpenMM energy file", file=sys.stderr)
+    print(file=sys.stderr)
 
     # Display column options
     display_column_options(df)
@@ -423,7 +443,7 @@ def main():
     selected_indices = get_user_selection(df)
 
     if not selected_indices:
-        print("No columns selected. Exiting.")
+        print("No columns selected. Exiting.", file=sys.stderr)
         sys.exit(0)
 
     # Print statistics
@@ -434,10 +454,10 @@ def main():
         print_fluctuation_properties(df, selected_indices, args.nmol)
 
     # Generate .xvg files for selected properties
-    print()
+    print(file=sys.stderr)
     generate_xvg_files(df, selected_indices, args.nmol)
 
-    print("\nOMM Energy reminds you: \"Energize your simulations!\" (OpenMM)")
+    print("\nOMM Energy reminds you: \"Energize your simulations!\" (OpenMM)", file=sys.stderr)
 
 if __name__ == "__main__":
     main()
